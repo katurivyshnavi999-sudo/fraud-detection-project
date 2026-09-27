@@ -1,0 +1,43 @@
+{
+  "active_model": {
+    "version": "v1.0.4-hybrid-demo",
+    "name": "Graph-Enhanced Adaptive Hybrid Learning Fraud Detector",
+    "status": "active_demo",
+    "is_demo_mode": true,
+    "architecture": "Siamese + Self-Attention + GNN (GraphSAGE) + Continual Rehearsal Buffer",
+    "trained_weights_present": false,
+    "last_checkpoint_timestamp": "2026-09-18T10:00:00Z",
+    "total_samples_ingested": 14250,
+    "buffer_size": 1248,
+    "drift_status": "stable",
+    "drift_index": 0.042,
+    "input_features": [
+      "amount",
+      "hour_of_day",
+      "day_of_week",
+      "velocity_1h",
+      "velocity_24h",
+      "device_sharing_degree",
+      "merchant_risk_prior",
+      "is_new_device",
+      "geo_distance_km"
+    ]
+  },
+  "history": [
+    {
+      "version": "v1.0.0-base",
+      "timestamp": "2026-08-01T08:00:00Z",
+      "description": "Initial base contrastive embedding model architecture"
+    },
+    {
+      "version": "v1.0.2-gnn-integrated",
+      "timestamp": "2026-08-25T14:30:00Z",
+      "description": "Added PyTorch Geometric 2-hop neighborhood aggregation"
+    },
+    {
+      "version": "v1.0.4-hybrid-demo",
+      "timestamp": "2026-09-18T10:00:00Z",
+      "description": "Current active academic prototype with Continual Learning buffer"
+    }
+  ]
+}

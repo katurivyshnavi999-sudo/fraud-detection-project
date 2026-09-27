@@ -1,0 +1,41 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-[#0B0F19] text-slate-100 font-sans antialiased;
+  }
+}
+
+/* Custom scrollbar for cyber fintech aesthetic */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0B0F19;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #1F293D;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #2D3D5A;
+}
+
+/* Restrained glowing badges */
+.glow-subtle-blue {
+  box-shadow: 0 0 15px -3px rgba(59, 130, 246, 0.15);
+}
+
+.glow-subtle-red {
+  box-shadow: 0 0 15px -3px rgba(239, 68, 68, 0.2);
+}
+
+.glow-subtle-emerald {
+  box-shadow: 0 0 15px -3px rgba(16, 185, 129, 0.15);
+}

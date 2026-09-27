@@ -1,0 +1,36 @@
+transaction_id,user_id,merchant_id,merchant_category,device_id,amount,currency,timestamp,payment_method,location,transaction_type,risk_score,is_fraud,fraud_type
+TXN_1001,USR_2041,MERCH_902,Electronics,DEV_4102,1250.00,USD,2026-09-18 02:14:08,Credit Card,Lagos,Online,88.5,1,Account Takeover
+TXN_1002,USR_1102,MERCH_104,Grocery,DEV_1102,34.50,USD,2026-09-18 08:30:12,UPI,Mumbai,POS,12.0,0,Legitimate
+TXN_1003,USR_3099,MERCH_771,Jewelry,DEV_8801,4890.00,USD,2026-09-18 03:45:22,Credit Card,New York,Online,94.2,1,Card Testing
+TXN_1004,USR_1102,MERCH_302,Dining,DEV_1102,52.80,USD,2026-09-18 12:15:40,Debit Card,Mumbai,POS,8.5,0,Legitimate
+TXN_1005,USR_4450,MERCH_660,Cryptocurrency,DEV_9910,2500.00,USD,2026-09-18 04:02:19,Net Banking,Singapore,Online,91.0,1,Synthetic Identity
+TXN_1006,USR_2041,MERCH_902,Electronics,DEV_4102,1300.00,USD,2026-09-18 02:18:45,Credit Card,Lagos,Online,92.4,1,Account Takeover
+TXN_1007,USR_5120,MERCH_104,Grocery,DEV_5120,89.20,USD,2026-09-18 09:12:00,UPI,Bengaluru,POS,14.0,0,Legitimate
+TXN_1008,USR_3099,MERCH_771,Jewelry,DEV_8801,4950.00,USD,2026-09-18 03:49:01,Credit Card,New York,Online,96.8,1,Card Testing
+TXN_1009,USR_6011,MERCH_205,Travel,DEV_6011,420.00,USD,2026-09-18 10:45:11,Net Banking,London,Online,22.0,0,Legitimate
+TXN_1010,USR_7734,MERCH_990,Gaming,DEV_7734,15.00,USD,2026-09-18 11:20:34,Digital Wallet,Tokyo,Online,18.5,0,Legitimate
+TXN_1011,USR_4450,MERCH_660,Cryptocurrency,DEV_9910,3100.00,USD,2026-09-18 04:15:30,Net Banking,Singapore,Online,93.5,1,Synthetic Identity
+TXN_1012,USR_8890,MERCH_411,Pharmacy,DEV_8890,45.20,USD,2026-09-18 13:05:12,UPI,Hyderabad,POS,6.2,0,Legitimate
+TXN_1013,USR_9201,MERCH_501,Electronics,DEV_9201,850.00,USD,2026-09-18 14:10:00,Credit Card,San Francisco,Online,28.0,0,Legitimate
+TXN_1014,USR_2041,MERCH_902,Electronics,DEV_4102,1420.00,USD,2026-09-18 02:22:10,Credit Card,Lagos,Online,95.0,1,Velocity Attack
+TXN_1015,USR_1044,MERCH_808,Streaming,DEV_1044,12.99,USD,2026-09-18 15:30:22,Digital Wallet,London,Online,9.0,0,Legitimate
+TXN_1016,USR_3310,MERCH_205,Travel,DEV_3310,1200.00,USD,2026-09-18 16:45:00,Credit Card,Dubai,Online,35.0,0,Legitimate
+TXN_1017,USR_9921,MERCH_999,Money Transfer,DEV_4102,5000.00,USD,2026-09-18 02:40:11,Net Banking,Lagos,Online,98.2,1,Device Spoofing
+TXN_1018,USR_2209,MERCH_104,Grocery,DEV_2209,62.30,USD,2026-09-18 17:15:44,Debit Card,Delhi,POS,11.0,0,Legitimate
+TXN_1019,USR_4450,MERCH_660,Cryptocurrency,DEV_9910,2800.00,USD,2026-09-18 04:30:00,Net Banking,Singapore,Online,94.0,1,Synthetic Identity
+TXN_1020,USR_7112,MERCH_302,Dining,DEV_7112,110.00,USD,2026-09-18 18:20:05,UPI,Chennai,POS,15.5,0,Legitimate
+TXN_1021,USR_8123,MERCH_411,Pharmacy,DEV_8123,28.75,USD,2026-09-18 18:55:19,Debit Card,Pune,POS,7.0,0,Legitimate
+TXN_1022,USR_9921,MERCH_999,Money Transfer,DEV_4102,4800.00,USD,2026-09-18 02:44:50,Net Banking,Lagos,Online,97.6,1,Device Spoofing
+TXN_1023,USR_6541,MERCH_501,Electronics,DEV_6541,620.00,USD,2026-09-18 19:10:00,Credit Card,Toronto,Online,24.0,0,Legitimate
+TXN_1024,USR_3099,MERCH_771,Jewelry,DEV_8801,5100.00,USD,2026-09-18 03:55:12,Credit Card,New York,Online,98.0,1,Card Testing
+TXN_1025,USR_1289,MERCH_104,Grocery,DEV_1289,45.00,USD,2026-09-18 19:45:30,UPI,Kolkata,POS,10.0,0,Legitimate
+TXN_1026,USR_7734,MERCH_990,Gaming,DEV_7734,60.00,USD,2026-09-18 20:05:12,Digital Wallet,Tokyo,Online,19.0,0,Legitimate
+TXN_1027,USR_5541,MERCH_808,Streaming,DEV_5541,19.99,USD,2026-09-18 20:30:00,Credit Card,Sydney,Online,8.0,0,Legitimate
+TXN_1028,USR_2041,MERCH_902,Electronics,DEV_4102,1550.00,USD,2026-09-18 02:50:00,Credit Card,Lagos,Online,96.0,1,Velocity Attack
+TXN_1029,USR_9012,MERCH_205,Travel,DEV_9012,780.00,USD,2026-09-18 21:15:22,Net Banking,Frankfurt,Online,26.5,0,Legitimate
+TXN_1030,USR_3389,MERCH_302,Dining,DEV_3389,84.50,USD,2026-09-18 21:40:10,UPI,Ahmedabad,POS,13.2,0,Legitimate
+TXN_1031,USR_9921,MERCH_999,Money Transfer,DEV_4102,4900.00,USD,2026-09-18 02:58:30,Net Banking,Lagos,Online,98.5,1,Device Spoofing
+TXN_1032,USR_1102,MERCH_104,Grocery,DEV_1102,28.40,USD,2026-09-18 22:00:15,UPI,Mumbai,POS,9.8,0,Legitimate
+TXN_1033,USR_6011,MERCH_501,Electronics,DEV_6011,1150.00,USD,2026-09-18 22:15:00,Credit Card,London,Online,31.0,0,Legitimate
+TXN_1034,USR_4450,MERCH_660,Cryptocurrency,DEV_9910,2950.00,USD,2026-09-18 04:45:10,Net Banking,Singapore,Online,95.2,1,Synthetic Identity
+TXN_1035,USR_8890,MERCH_302,Dining,DEV_8890,65.00,USD,2026-09-18 22:45:00,UPI,Hyderabad,POS,11.5,0,Legitimate
