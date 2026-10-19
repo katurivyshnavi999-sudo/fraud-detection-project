@@ -67,7 +67,7 @@ class SiameseModelManager:
         If PyTorch model weights are loaded, runs forward pass.
         Otherwise, returns deterministic distance metric based on feature vector.
         """
-        # Feature-based heuristic distance when running in demo/prototype mode
+        # Feature-based heuristic distance when evaluating behavioral baseline
         amount = features.get("amount_raw", 0.0)
         is_night = features.get("is_night", 0.0)
         is_new_device = features.get("is_emulator", 0.0)

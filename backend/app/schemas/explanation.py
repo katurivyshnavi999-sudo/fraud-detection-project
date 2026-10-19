@@ -16,7 +16,7 @@ class ExplanationResponse(BaseModel):
     risk_score: float
     base_value: float  # E[f(x)] base expected value in SHAP
     model_output: float  # f(x)
-    is_demo_data: bool = True
+    is_simulated_data: bool = True
     notice: str
     features: List[FeatureAttribution]
     positive_fraud_push: float

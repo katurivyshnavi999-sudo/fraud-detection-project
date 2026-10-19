@@ -3,20 +3,38 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.config import settings
 from app.database.seed_data import seed_database_if_empty
-from app.api import auth, dashboard, transactions, graph, explanation, continual, dataset, analytics, project_info
+from app.api import (
+    dashboard,
+    transactions,
+    alerts,
+    investigations,
+    simulation,
+    users,
+    models,
+    graph,
+    explanation,
+    continual,
+    dataset,
+    analytics,
+    project_info,
+    auth,
+    demo,
+    reviews
+)
+from app.websocket import stream_server
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup: Seed initial realistic database if empty
-    print("Initializing Fraud Detection Database...")
+    print("Initializing PayGuard Database...")
     seed_database_if_empty()
-    print("Backend ready to receive API requests.")
+    print("PayGuard Backend ready to receive API requests.")
     yield
-    print("Backend shutting down.")
+    print("PayGuard Backend shutting down.")
 
 app = FastAPI(
-    title="Digital Payment Fraud Detection System API",
-    description="Backend API for BTech final-year project: Graph-Enhanced Adaptive Hybrid Learning for Digital Payment Fraud Detection",
+    title=settings.PROJECT_TITLE,
+    description="PayGuard Backend API: Graph-Enhanced Adaptive Hybrid Learning for Digital Payment Fraud Detection",
     version=settings.VERSION,
     lifespan=lifespan
 )
@@ -31,27 +49,42 @@ app.add_middleware(
 )
 
 # Register All API Routers
-app.include_router(auth.router)
 app.include_router(dashboard.router)
 app.include_router(transactions.router)
+app.include_router(alerts.router)
+app.include_router(investigations.router)
+app.include_router(simulation.router)
+app.include_router(users.router)
+app.include_router(models.router)
 app.include_router(graph.router)
 app.include_router(explanation.router)
 app.include_router(continual.router)
 app.include_router(dataset.router)
 app.include_router(analytics.router)
 app.include_router(project_info.router)
+app.include_router(auth.router)
+app.include_router(demo.router)
+app.include_router(reviews.router)
+
+# Register WebSocket Stream Router
+app.include_router(stream_server.router)
 
 @app.get("/")
+@app.get("/health")
+@app.get("/api/health")
 def root():
     return {
         "status": "online",
-        "project": settings.PROJECT_TITLE,
+        "project": settings.PROJECT_NAME,
+        "title": settings.PROJECT_TITLE,
+        "tagline": settings.TAGLINE,
+        "subtitle": settings.SUBTITLE,
         "department": settings.DEPARTMENT,
         "version": settings.VERSION,
-        "is_demo_mode": settings.IS_DEMO_MODE,
         "docs_url": "/docs",
         "redoc_url": "/redoc"
     }
+
 
 if __name__ == "__main__":
     import uvicorn

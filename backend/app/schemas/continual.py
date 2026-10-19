@@ -11,7 +11,6 @@ class ModelVersionItem(BaseModel):
 
 class ModelStatusResponse(BaseModel):
     current_model: str
-    is_demo_mode: bool
     status: str
     last_update_time: str
     number_of_new_samples: int

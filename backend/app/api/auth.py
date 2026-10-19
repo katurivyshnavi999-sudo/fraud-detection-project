@@ -1,45 +1,106 @@
-from fastapi import APIRouter, HTTPException, status
-from app.schemas.auth import LoginRequest, UserProfile
-from app.config import settings
+from fastapi import APIRouter, Depends, HTTPException, status
+from pydantic import BaseModel
+from sqlalchemy.orm import Session
+from app.database.connection import get_db
+from app.database.models import User, AuditEvent
+from app.auth.security import verify_password, create_access_token
+from app.auth.deps import get_current_user
 
 router = APIRouter(prefix="/api/auth", tags=["Authentication"])
 
-@router.post("/login", response_model=UserProfile)
-def login(creds: LoginRequest):
+class LoginRequest(BaseModel):
+    username: str
+    password: str
+
+class UserProfileOut(BaseModel):
+    user_id: str
+    username: str
+    name: str
+    email: str
+    role: str
+    account_type: str
+    risk_level: str
+
+class LoginResponse(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+    user: UserProfileOut
+
+@router.post("/login", response_model=LoginResponse)
+def login(creds: LoginRequest, db: Session = Depends(get_db)):
     """
-    Authenticate analyst.
-    Supports demo login with analyst@fraudshield.ai or any valid demo credentials.
+    Authenticates administrator or regular user credentials.
+    Returns signed JWT access token and user profile.
     """
-    # Check demo credentials or accept academic test login
-    email_clean = creds.email.strip().lower()
-    
-    if not email_clean or not creds.password:
+    uname = creds.username.strip()
+    user = db.query(User).filter(
+        (User.username == uname) | (User.user_id == uname) | (User.email == uname)
+    ).first()
+
+    if not user or not user.password_hash or not verify_password(creds.password, user.password_hash):
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Email and password are required."
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid username or password credentials.",
+            headers={"WWW-Authenticate": "Bearer"},
         )
 
-    # Allow official demo account or test logins
-    name = settings.DEMO_USER_NAME
-    role = settings.DEMO_USER_ROLE
-    if email_clean != settings.DEMO_USER_EMAIL.lower():
-        name = email_clean.split("@")[0].capitalize() + " (Analyst)"
-        role = "Fraud Investigator"
+    token = create_access_token({
+        "sub": user.user_id,
+        "username": user.username or user.user_id,
+        "role": user.role,
+        "name": user.name
+    })
 
-    return UserProfile(
-        email=creds.email,
-        name=name,
-        role=role,
-        is_demo=True,
-        token="fraudshield_jwt_demo_token_xyz987654321"
+    # Log audit event
+    audit = AuditEvent(
+        user_id=user.user_id,
+        action="USER_LOGIN",
+        entity_type="user",
+        entity_id=user.user_id,
+        status="SUCCESS",
+        details=f"User {user.user_id} ({user.role}) authenticated successfully."
     )
+    db.add(audit)
+    db.commit()
 
-@router.get("/me", response_model=UserProfile)
-def get_current_user():
-    return UserProfile(
-        email=settings.DEMO_USER_EMAIL,
-        name=settings.DEMO_USER_NAME,
-        role=settings.DEMO_USER_ROLE,
-        is_demo=True,
-        token="fraudshield_jwt_demo_token_xyz987654321"
+    return {
+        "access_token": token,
+        "token_type": "bearer",
+        "user": {
+            "user_id": user.user_id,
+            "username": user.username or user.user_id,
+            "name": user.name,
+            "email": user.email,
+            "role": user.role,
+            "account_type": user.account_type or "Savings",
+            "risk_level": user.risk_level or "Low"
+        }
+    }
+
+@router.get("/me", response_model=UserProfileOut)
+def get_current_profile(current_user: User = Depends(get_current_user)):
+    """Returns currently authenticated user profile."""
+    return {
+        "user_id": current_user.user_id,
+        "username": current_user.username or current_user.user_id,
+        "name": current_user.name,
+        "email": current_user.email,
+        "role": current_user.role,
+        "account_type": current_user.account_type or "Savings",
+        "risk_level": current_user.risk_level or "Low"
+    }
+
+@router.post("/logout")
+def logout(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    """Logs out user and writes audit event."""
+    audit = AuditEvent(
+        user_id=current_user.user_id,
+        action="USER_LOGOUT",
+        entity_type="user",
+        entity_id=current_user.user_id,
+        status="SUCCESS",
+        details=f"User {current_user.user_id} logged out."
     )
+    db.add(audit)
+    db.commit()
+    return {"status": "success", "message": "Successfully logged out."}

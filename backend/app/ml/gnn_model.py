@@ -1,11 +1,12 @@
 """
 Graph Neural Network (GNN) and Relational Graph Analysis Component.
-Demonstrates neighborhood aggregation across User -> Device -> Transaction -> Merchant entities.
-Leverages NetworkX for topology analysis and provides PyTorch Geometric (PyG) architecture interfaces.
+Performs neighborhood aggregation across User -> Device -> Transaction -> Merchant entities.
+Leverages PyTorch Geometric (PyG) Heterogeneous GNN message passing and NetworkX topological analysis.
 """
 
 from typing import Dict, Any, List
 import networkx as nx
+from app.gnn.service import gnn_service
 
 try:
     import torch
@@ -81,17 +82,13 @@ class HeteroGraphFraudDetector:
 
     def compute_graph_embedding_risk(self, user_id: str, device_id: str, merchant_id: str) -> float:
         """
-        Simulates GNN Message-Passing aggregation:
+        Executes GNN Relational Message-Passing aggregation:
         h_v^(k) = AGGREGATE({h_u^(k-1) : u in N(v)})
+        Delegates to PyG GNNInferenceService for calibrated graph embedding risk.
         """
-        # Graph proximity to flagged fraud clusters
-        high_risk_cluster = {"USR_2041", "USR_9921", "DEV_4102", "USR_3099", "DEV_8801", "MERCH_999"}
-        
-        count = sum(1 for node in [user_id, device_id, merchant_id] if node in high_risk_cluster)
-        
-        if count >= 2:
-            return 0.94
-        elif count == 1:
-            return 0.65
-        else:
-            return 0.08
+        res = gnn_service.score_transaction_graph({
+            "user_id": user_id,
+            "device_id": device_id,
+            "merchant_id": merchant_id
+        })
+        return float(res["gnn_score"] / 100.0)

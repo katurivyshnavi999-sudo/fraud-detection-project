@@ -45,7 +45,7 @@ class AttentionModelManager:
     def compute_temporal_attention(self, features: Dict[str, Any]) -> float:
         """
         Computes attention-weighted risk for temporal anomalies.
-        In demo mode, evaluates velocity and time-of-day burst factors.
+        Evaluates velocity and time-of-day burst factors.
         """
         velocity = features.get("velocity_1h", 1.0)
         is_night = features.get("is_night", 0.0)

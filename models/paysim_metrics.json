@@ -1,0 +1,81 @@
+{
+  "dataset_source": "Synthetic PaySim Demo Dataset (Clearly Labelled)",
+  "is_actual_paysim": false,
+  "train_samples": 1750,
+  "val_samples": 375,
+  "test_samples": 375,
+  "accuracy": 1.0,
+  "precision": 1.0,
+  "recall": 1.0,
+  "f1_score": 1.0,
+  "roc_auc": 1.0,
+  "pr_auc": 1.0,
+  "confusion_matrix": {
+    "tn": 349,
+    "fp": 0,
+    "fn": 0,
+    "tp": 26
+  },
+  "feature_importances": [
+    {
+      "feature": "orig_zero_balance",
+      "importance": 0.2324
+    },
+    {
+      "feature": "newbalanceOrig",
+      "importance": 0.1961
+    },
+    {
+      "feature": "oldbalanceOrg",
+      "importance": 0.1917
+    },
+    {
+      "feature": "amount",
+      "importance": 0.1892
+    },
+    {
+      "feature": "newbalanceDest",
+      "importance": 0.0628
+    },
+    {
+      "feature": "dest_balance_err",
+      "importance": 0.055
+    },
+    {
+      "feature": "oldbalanceDest",
+      "importance": 0.0398
+    },
+    {
+      "feature": "type_PAYMENT",
+      "importance": 0.0136
+    },
+    {
+      "feature": "type_TRANSFER",
+      "importance": 0.0126
+    },
+    {
+      "feature": "type_CASH_OUT",
+      "importance": 0.0048
+    },
+    {
+      "feature": "type_CASH_IN",
+      "importance": 0.0014
+    },
+    {
+      "feature": "type_DEBIT",
+      "importance": 0.0007
+    },
+    {
+      "feature": "hour_of_day",
+      "importance": 0.0
+    },
+    {
+      "feature": "orig_balance_err",
+      "importance": 0.0
+    },
+    {
+      "feature": "dest_zero_balance",
+      "importance": 0.0
+    }
+  ]
+}

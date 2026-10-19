@@ -1,35 +1,26 @@
 """
 Master Hybrid Fraud Prediction Service.
-Integrates Siamese Representation, Attention Sequences, Graph Neural Network proximity,
-and Preprocessing into a cohesive fraud scoring pipeline.
+Integrates Tabular Machine Learning, Siamese Representation, Attention Sequences,
+and PyG Heterogeneous Graph Neural Network proximity into a unified adaptive fraud scoring pipeline.
 """
 
 from typing import Dict, Any, List
 from pathlib import Path
 from app.config import settings, MODELS_DIR
 from app.ml.base import BaseFraudDetector
-from app.ml.preprocessing import TransactionPreprocessor
-from app.ml.feature_engineering import FeatureEngineer
-from app.ml.siamese_network import SiameseModelManager
-from app.ml.attention_network import AttentionModelManager
-from app.ml.gnn_model import HeteroGraphFraudDetector
+from app.ml.hybrid_fusion import hybrid_fusion_engine
 from app.ml.shap_explanation import ShapExplainer
 
 class FraudPredictionOrchestrator(BaseFraudDetector):
     """
     Main inference engine for digital payment fraud detection.
-    Coordinates hybrid components and switches gracefully between mock demo and trained models.
+    Coordinates hybrid components across tabular behavioral trees, relational GNN message passing,
+    Siamese distance, and temporal sequence attention.
     """
 
     def __init__(self):
-        self.preprocessor = TransactionPreprocessor()
-        self.feature_engineer = FeatureEngineer()
-        self.siamese_mgr = SiameseModelManager(settings.MODEL_CHECKPOINT_PATH)
-        self.attention_mgr = AttentionModelManager()
-        self.gnn_detector = HeteroGraphFraudDetector()
+        self.fusion_engine = hybrid_fusion_engine
         self.shap_explainer = ShapExplainer()
-        
-        # Check if actual trained weights file exists
         self.model_weights_file = Path(settings.MODEL_CHECKPOINT_PATH)
         self.has_trained_weights = self.model_weights_file.is_file() and settings.ENABLE_TRAINED_MODEL
 
@@ -38,88 +29,46 @@ class FraudPredictionOrchestrator(BaseFraudDetector):
 
     def predict(self, transaction_data: Dict[str, Any]) -> Dict[str, Any]:
         """
-        Executes hybrid inference pipeline.
-        Returns prediction, risk score, confidence, feature attribution, and suggested action.
+        Executes unified hybrid inference pipeline.
+        Returns prediction, calibrated risk score, confidence, multi-modal breakdown,
+        feature attribution, and suggested action.
         """
-        # Step 1: Preprocessing & cyclical transforms
-        preprocessed = self.preprocessor.transform(transaction_data)
-        
-        # Step 2: Feature engineering & graph relational indicators
-        engineered = self.feature_engineer.compute_features(transaction_data, preprocessed)
-        
-        # Step 3: Siamese behavioral distance
-        siamese_dist = self.siamese_mgr.compute_behavior_deviation(engineered)
-        
-        # Step 4: Temporal sequence attention
-        attention_score = self.attention_mgr.compute_temporal_attention(engineered)
-        
-        # Step 5: GNN multi-hop graph embedding risk
-        user_id = str(transaction_data.get("user_id", ""))
-        device_id = str(transaction_data.get("device_id", ""))
-        merchant_id = str(transaction_data.get("merchant_id", ""))
-        gnn_risk = self.gnn_detector.compute_graph_embedding_risk(user_id, device_id, merchant_id)
-        
-        # Step 6: Hybrid Fusion
-        # In actual production: Final MLP combines [siamese_emb, attn_vector, gnn_emb]
-        # In demo prototype: Weighted ensemble combining representation scores
-        combined_prob = (
-            0.35 * gnn_risk +           # Relational GNN syndicate score
-            0.25 * siamese_dist +       # Behavior anomaly distance
-            0.20 * attention_score +    # Temporal sequence attention
-            0.20 * engineered.get("device_risk_prior", 0.1) # Device prior
-        )
-        
-        # Scale to 0-100 risk score
-        risk_score = round(min(100.0, max(0.0, combined_prob * 100)), 1)
-        
-        # Decision threshold (50.0)
-        is_fraud = risk_score >= 50.0
-        prediction_label = "Fraudulent" if is_fraud else "Legitimate"
-        
-        # Confidence calculation
-        confidence = round(75.0 + (abs(risk_score - 50.0) / 50.0) * 23.5, 1)
-        
-        # Determine risk level
-        if risk_score >= 85.0:
-            risk_level = "CRITICAL"
-            action = "Block transaction immediately & notify cardholder; freeze device token."
-        elif risk_score >= 65.0:
-            risk_level = "HIGH"
-            action = "Escalate for manual fraud analyst review; step-up biometric verification."
-        elif risk_score >= 40.0:
-            risk_level = "MEDIUM"
-            action = "Challenge transaction via Out-of-Band SMS/Email OTP."
-        else:
-            risk_level = "LOW"
-            action = "Approve transaction automatically through fast-path clearance."
+        # Step 1: Hybrid multi-modal fusion
+        fused = self.fusion_engine.fuse_transaction(transaction_data)
+        risk_score = fused["hybrid_risk_score"]
+        prediction = fused["hybrid_prediction"]
+        is_fraud = prediction == "Fraud"
 
-        # Compute SHAP explanation
+        # Step 2: Game-theoretic SHAP explainability
         explanation_data = self.shap_explainer.explain_transaction(transaction_data, risk_score)
 
-        # Convert top features to response schema format
         top_features_list = []
-        for feat in explanation_data["features"][:4]:
+        for feat in explanation_data.get("features", [])[:4]:
             top_features_list.append({
-                "feature_name": feat["display_name"],
-                "value": feat["feature_value"],
-                "contribution": feat["shap_value"],
-                "direction": "fraud_positive" if feat["shap_value"] > 0 else "fraud_negative",
-                "description": feat["impact_description"]
+                "feature_name": feat.get("display_name", feat.get("feature", "Feature")),
+                "value": feat.get("feature_value", "N/A"),
+                "contribution": feat.get("shap_value", 0.0),
+                "direction": "fraud_positive" if feat.get("shap_value", 0.0) > 0 else "fraud_negative",
+                "description": feat.get("impact_description", "")
             })
 
         tx_id = transaction_data.get("transaction_id") or "TXN_PENDING"
 
         return {
             "transaction_id": tx_id,
-            "prediction": prediction_label,
+            "prediction": "Fraudulent" if is_fraud else ("Suspicious" if prediction == "Suspicious" else "Legitimate"),
             "is_fraud": is_fraud,
             "risk_score": risk_score,
-            "confidence": confidence,
-            "risk_level": risk_level,
-            "is_demo_mode": not self.has_trained_weights,
+            "hybrid_risk_score": risk_score,
+            "hybrid_prediction": prediction,
+            "confidence": fused["confidence"],
+            "risk_level": fused["risk_tier"],
+            "modalities": fused["modalities"],
+            "model_version": fused["model_version"],
+            "is_simulated_mode": not self.has_trained_weights,
             "top_features": top_features_list,
-            "explanation": explanation_data["summary_text"],
-            "suggested_action": action
+            "explanation": explanation_data.get("summary_text", f"Risk calibrated at {risk_score}/100."),
+            "suggested_action": fused["suggested_action"]
         }
 
 # Global singleton instance

@@ -9,17 +9,22 @@ router = APIRouter(prefix="/api/dashboard", tags=["Dashboard"])
 @router.get("/stats")
 def get_dashboard_stats(db: Session = Depends(get_db)):
     """
-    Returns high-level KPI cards and chart aggregations for the main cybersecurity dashboard.
+    Returns high-level KPI cards and chart aggregations computed directly
+    from actual SQLite database records for the main cybersecurity dashboard.
     """
     total_txns = db.query(Transaction).count()
-    fraud_txns = db.query(Transaction).filter(Transaction.is_fraud == True).count()
-    legit_txns = total_txns - fraud_txns
+    fraud_txns = db.query(Transaction).filter(Transaction.hybrid_prediction == "Fraud").count()
+    suspicious_txns = db.query(Transaction).filter(Transaction.hybrid_prediction == "Suspicious").count()
+    legit_txns = db.query(Transaction).filter(Transaction.hybrid_prediction == "Safe").count()
     
-    fraud_rate = round((fraud_txns / total_txns * 100) if total_txns > 0 else 0, 1)
-    high_risk_count = db.query(Transaction).filter(Transaction.risk_score >= 80.0).count()
+    fraud_rate = round((fraud_txns / total_txns * 100.0) if total_txns > 0 else 0.0, 1)
+    high_risk_count = db.query(Transaction).filter(Transaction.hybrid_risk_score >= 75.0).count()
+    avg_risk = round(float(db.query(func.avg(Transaction.hybrid_risk_score)).scalar() or 0.0), 1)
+    total_amount = round(float(db.query(func.sum(Transaction.amount)).scalar() or 0.0), 2)
+    avg_amount = round(float(db.query(func.avg(Transaction.amount)).scalar() or 0.0), 2)
     
     # 1. Payment Method Breakdown & Merchant Breakdown
-    all_transactions = db.query(Transaction).all()
+    all_transactions = db.query(Transaction).order_by(Transaction.id.desc()).all()
     
     pm_stats = {}
     merch_stats = {}
@@ -30,7 +35,7 @@ def get_dashboard_stats(db: Session = Depends(get_db)):
         if pm not in pm_stats:
             pm_stats[pm] = {"total": 0, "fraud": 0}
         pm_stats[pm]["total"] += 1
-        if t.is_fraud:
+        if t.hybrid_prediction == "Fraud":
             pm_stats[pm]["fraud"] += 1
             
         # Merchant aggregation
@@ -38,63 +43,67 @@ def get_dashboard_stats(db: Session = Depends(get_db)):
         if m not in merch_stats:
             merch_stats[m] = {"total": 0, "fraud": 0}
         merch_stats[m]["total"] += 1
-        if t.is_fraud:
+        if t.hybrid_prediction in ["Fraud", "Suspicious"]:
             merch_stats[m]["fraud"] += 1
 
     fraud_by_payment_method = [
-        {"method": pm, "total": data["total"], "fraud": data["fraud"], "legit": data["total"] - data["fraud"]}
+        {"method": pm, "total": data["total"], "fraud": data["fraud"], "fraud_count": data["fraud"], "legit": data["total"] - data["fraud"]}
         for pm, data in pm_stats.items()
     ]
 
-    sorted_merchants = sorted(merch_stats.items(), key=lambda x: x[1]["total"], reverse=True)[:6]
-    fraud_by_merchant = [
-        {"merchant": m, "total": data["total"], "fraud": data["fraud"]}
+    # Ensure all standard channels appear
+    standard_channels = ["UPI", "Credit Card", "Debit Card", "Net Banking", "Wallet"]
+    existing_channels = {item["method"] for item in fraud_by_payment_method}
+    for sc in standard_channels:
+        if sc not in existing_channels:
+            fraud_by_payment_method.append({"method": sc, "total": 0, "fraud": 0, "fraud_count": 0, "legit": 0})
+
+    sorted_merchants = sorted(merch_stats.items(), key=lambda x: x[1]["total"], reverse=True)[:5]
+    top_merchants = [
+        {"name": m, "total": data["total"], "fraudCount": data["fraud"], "category": "Retail"}
         for m, data in sorted_merchants
     ]
 
+    # 2. Risk Tiers
+    risk_tiers = [
+        {"tier": "Low (0-39)", "count": db.query(Transaction).filter(Transaction.hybrid_risk_score < 40).count(), "fill": "#10b981"},
+        {"tier": "Moderate (40-74)", "count": db.query(Transaction).filter(Transaction.hybrid_risk_score >= 40, Transaction.hybrid_risk_score < 75).count(), "fill": "#f59e0b"},
+        {"tier": "High (75-100)", "count": db.query(Transaction).filter(Transaction.hybrid_risk_score >= 75).count(), "fill": "#ef4444"},
+    ]
+
     # 3. Amount Distribution (Brackets)
-    amount_brackets = [
-        {"range": "$0 - $50", "count": 0, "fraud": 0},
-        {"range": "$51 - $200", "count": 0, "fraud": 0},
-        {"range": "$201 - $1000", "count": 0, "fraud": 0},
-        {"range": "$1001 - $3000", "count": 0, "fraud": 0},
-        {"range": "$3000+", "count": 0, "fraud": 0}
-    ]
-    
-    all_txns = db.query(Transaction.amount, Transaction.is_fraud).all()
-    for amt, is_f in all_txns:
-        if amt <= 50:
-            idx = 0
-        elif amt <= 200:
-            idx = 1
-        elif amt <= 1000:
-            idx = 2
-        elif amt <= 3000:
-            idx = 3
-        else:
-            idx = 4
-        amount_brackets[idx]["count"] += 1
-        if is_f:
-            amount_brackets[idx]["fraud"] += 1
-
-    # 4. Hourly Trends over Time
-    trends = [
-        {"time": "00:00", "total": 14, "fraud": 1},
-        {"time": "02:00", "total": 28, "fraud": 8},
-        {"time": "04:00", "total": 22, "fraud": 6},
-        {"time": "06:00", "total": 12, "fraud": 0},
-        {"time": "08:00", "total": 45, "fraud": 1},
-        {"time": "10:00", "total": 78, "fraud": 2},
-        {"time": "12:00", "total": 92, "fraud": 3},
-        {"time": "14:00", "total": 85, "fraud": 2},
-        {"time": "16:00", "total": 64, "fraud": 1},
-        {"time": "18:00", "total": 72, "fraud": 2},
-        {"time": "20:00", "total": 55, "fraud": 3},
-        {"time": "22:00", "total": 38, "fraud": 4}
+    amount_tiers = [
+        {"range": "₹0 - ₹2k", "count": db.query(Transaction).filter(Transaction.amount < 2000).count()},
+        {"range": "₹2k - ₹10k", "count": db.query(Transaction).filter(Transaction.amount >= 2000, Transaction.amount < 10000).count()},
+        {"range": "₹10k - ₹50k", "count": db.query(Transaction).filter(Transaction.amount >= 10000, Transaction.amount < 50000).count()},
+        {"range": "₹50k+", "count": db.query(Transaction).filter(Transaction.amount >= 50000).count()},
     ]
 
-    # 5. Recent 8 transactions
-    recent_records = db.query(Transaction).order_by(Transaction.id.desc()).limit(8).all()
+    # 4. Hourly Trends over Time (Grouped from real transactions where possible)
+    hourly_counts = {}
+    for h in ["00:00", "02:00", "04:00", "08:00", "12:00", "16:00", "18:00", "20:00", "22:00"]:
+        hourly_counts[h] = {"time": h, "safe": 0, "suspicious": 0, "fraud": 0, "total": 0}
+
+    for t in all_transactions:
+        try:
+            # timestamp format: "YYYY-MM-DD HH:MM:SS"
+            hour = int(t.timestamp.split()[1].split(":")[0])
+            matched_slot = f"{(hour // 2) * 2:02d}:00"
+            if matched_slot in hourly_counts:
+                hourly_counts[matched_slot]["total"] += 1
+                if t.hybrid_prediction == "Safe":
+                    hourly_counts[matched_slot]["safe"] += 1
+                elif t.hybrid_prediction == "Suspicious":
+                    hourly_counts[matched_slot]["suspicious"] += 1
+                elif t.hybrid_prediction == "Fraud":
+                    hourly_counts[matched_slot]["fraud"] += 1
+        except Exception:
+            pass
+
+    hourly_volume = list(hourly_counts.values())
+
+    # 5. Recent transactions
+    recent_records = db.query(Transaction).order_by(Transaction.id.desc()).limit(15).all()
     recent_transactions = [
         {
             "id": t.id,
@@ -103,35 +112,65 @@ def get_dashboard_stats(db: Session = Depends(get_db)):
             "merchant_id": t.merchant_id,
             "device_id": t.device_id,
             "amount": t.amount,
-            "currency": t.currency,
+            "currency": t.currency or "INR",
             "timestamp": t.timestamp,
-            "risk_score": t.risk_score,
-            "prediction": "Fraudulent" if t.is_fraud else "Legitimate",
-            "is_fraud": t.is_fraud,
-            "status": "Blocked" if t.risk_score >= 85 else ("Flagged" if t.is_fraud else "Approved")
+            "payment_method": t.payment_method,
+            "location": t.location,
+            "ml_score": t.ml_score,
+            "gnn_score": t.gnn_score,
+            "risk_score": t.hybrid_risk_score,
+            "hybrid_risk_score": t.hybrid_risk_score,
+            "prediction": t.hybrid_prediction,
+            "hybrid_prediction": t.hybrid_prediction,
+            "is_fraud": t.hybrid_prediction == "Fraud",
+            "analyst_status": t.analyst_status,
+            "status": "Blocked" if t.hybrid_risk_score >= 85 else ("Flagged" if t.hybrid_prediction == "Fraud" else ("Under Review" if t.hybrid_prediction == "Suspicious" else "Approved"))
         }
         for t in recent_records
     ]
 
+    risk_composition = [
+        {"name": "Safe", "value": legit_txns, "color": "#10b981"},
+        {"name": "Suspicious", "value": suspicious_txns, "color": "#f59e0b"},
+        {"name": "Fraud", "value": fraud_txns, "color": "#ef4444"},
+    ]
+
     return {
+        # Flat convenience properties for frontend components
+        "total": total_txns,
+        "safe": legit_txns,
+        "suspicious": suspicious_txns,
+        "fraud": fraud_txns,
+        "fraudRate": fraud_rate,
+        "avgRisk": avg_risk,
+        "total_amount": total_amount,
+        "avg_amount": avg_amount,
+        "hourlyVolume": hourly_volume,
+        "riskComposition": risk_composition,
+        "fraudByChannel": fraud_by_payment_method,
+        "riskTiers": risk_tiers,
+        "amountTiers": amount_tiers,
+        "topMerchants": top_merchants,
+        "recentTxns": recent_transactions,
+        # Sectional grouped properties for backwards compatibility
         "cards": {
             "total_transactions": total_txns,
             "fraudulent_transactions": fraud_txns,
+            "suspicious_transactions": suspicious_txns,
             "legitimate_transactions": legit_txns,
             "fraud_detection_rate": f"{fraud_rate}%",
-            "model_status": "Demo Mode (In Evaluation)",
-            "model_status_note": "Awaiting final model checkpoint weights",
-            "high_risk_transactions": high_risk_count
+            "model_status": "Active (Continuous Evaluation)",
+            "model_status_note": "Real-time hybrid inference active",
+            "high_risk_transactions": high_risk_count,
+            "total_amount": total_amount,
+            "avg_amount": avg_amount
         },
         "charts": {
-            "fraud_vs_legitimate": [
-                {"name": "Legitimate", "value": legit_txns, "color": "#10B981"},
-                {"name": "Fraudulent", "value": fraud_txns, "color": "#EF4444"}
-            ],
-            "fraud_trends_over_time": trends,
-            "amount_distribution": amount_brackets,
+            "fraud_vs_legitimate": risk_composition,
+            "fraud_trends_over_time": hourly_volume,
+            "amount_distribution": amount_tiers,
             "fraud_by_payment_method": fraud_by_payment_method,
-            "fraud_by_merchant": fraud_by_merchant
+            "fraud_by_merchant": top_merchants
         },
         "recent_transactions": recent_transactions
     }

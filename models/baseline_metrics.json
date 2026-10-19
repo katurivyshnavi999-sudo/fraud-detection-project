@@ -1,0 +1,281 @@
+{
+  "random_forest": {
+    "model_name": "Random Forest",
+    "accuracy": 1.0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1_score": 1.0,
+    "roc_auc": 1.0,
+    "pr_auc": 1.0,
+    "confusion_matrix": {
+      "true_negative": 94,
+      "false_positive": 0,
+      "false_negative": 0,
+      "true_positive": 6
+    },
+    "feature_importances": [
+      {
+        "feature": "amount",
+        "importance": 0.2614
+      },
+      {
+        "feature": "geo_distance_risk",
+        "importance": 0.2197
+      },
+      {
+        "feature": "log_amount",
+        "importance": 0.2015
+      },
+      {
+        "feature": "amount_to_user_avg_ratio",
+        "importance": 0.1155
+      },
+      {
+        "feature": "merchant_risk_prior",
+        "importance": 0.0866
+      },
+      {
+        "feature": "device_risk_prior",
+        "importance": 0.0495
+      },
+      {
+        "feature": "velocity_24h",
+        "importance": 0.0349
+      },
+      {
+        "feature": "device_sharing_degree",
+        "importance": 0.0169
+      },
+      {
+        "feature": "velocity_1h",
+        "importance": 0.0071
+      },
+      {
+        "feature": "is_night",
+        "importance": 0.0031
+      },
+      {
+        "feature": "is_emulator",
+        "importance": 0.003
+      },
+      {
+        "feature": "payment_method_code",
+        "importance": 0.0004
+      },
+      {
+        "feature": "hour",
+        "importance": 0.0004
+      },
+      {
+        "feature": "hour_cos",
+        "importance": 0.0
+      },
+      {
+        "feature": "day_of_week",
+        "importance": 0.0
+      },
+      {
+        "feature": "hour_sin",
+        "importance": 0.0
+      },
+      {
+        "feature": "is_weekend",
+        "importance": 0.0
+      }
+    ],
+    "roc_curve": [
+      {
+        "fpr": 0.0,
+        "tpr": 0.0
+      },
+      {
+        "fpr": 0.0,
+        "tpr": 0.8333
+      },
+      {
+        "fpr": 0.0,
+        "tpr": 1.0
+      },
+      {
+        "fpr": 0.0106,
+        "tpr": 1.0
+      },
+      {
+        "fpr": 0.0851,
+        "tpr": 1.0
+      },
+      {
+        "fpr": 1.0,
+        "tpr": 1.0
+      },
+      {
+        "fpr": 1.0,
+        "tpr": 1.0
+      }
+    ],
+    "pr_curve": [
+      {
+        "recall": 1.0,
+        "precision": 0.06
+      },
+      {
+        "recall": 1.0,
+        "precision": 0.4286
+      },
+      {
+        "recall": 1.0,
+        "precision": 0.8571
+      },
+      {
+        "recall": 1.0,
+        "precision": 1.0
+      },
+      {
+        "recall": 0.8333,
+        "precision": 1.0
+      },
+      {
+        "recall": 0.0,
+        "precision": 1.0
+      }
+    ]
+  },
+  "xgboost": {
+    "model_name": "Gradient Boosted Trees (HistGradientBoosting)",
+    "accuracy": 1.0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1_score": 1.0,
+    "roc_auc": 1.0,
+    "pr_auc": 1.0,
+    "confusion_matrix": {
+      "true_negative": 94,
+      "false_positive": 0,
+      "false_negative": 0,
+      "true_positive": 6
+    },
+    "feature_importances": [
+      {
+        "feature": "amount",
+        "importance": 0.0588
+      },
+      {
+        "feature": "log_amount",
+        "importance": 0.0588
+      },
+      {
+        "feature": "amount_to_user_avg_ratio",
+        "importance": 0.0588
+      },
+      {
+        "feature": "hour",
+        "importance": 0.0588
+      },
+      {
+        "feature": "hour_sin",
+        "importance": 0.0588
+      },
+      {
+        "feature": "hour_cos",
+        "importance": 0.0588
+      },
+      {
+        "feature": "day_of_week",
+        "importance": 0.0588
+      },
+      {
+        "feature": "is_weekend",
+        "importance": 0.0588
+      },
+      {
+        "feature": "is_night",
+        "importance": 0.0588
+      },
+      {
+        "feature": "payment_method_code",
+        "importance": 0.0588
+      },
+      {
+        "feature": "velocity_1h",
+        "importance": 0.0588
+      },
+      {
+        "feature": "velocity_24h",
+        "importance": 0.0588
+      },
+      {
+        "feature": "device_sharing_degree",
+        "importance": 0.0588
+      },
+      {
+        "feature": "is_emulator",
+        "importance": 0.0588
+      },
+      {
+        "feature": "device_risk_prior",
+        "importance": 0.0588
+      },
+      {
+        "feature": "merchant_risk_prior",
+        "importance": 0.0588
+      },
+      {
+        "feature": "geo_distance_risk",
+        "importance": 0.0588
+      }
+    ],
+    "roc_curve": [
+      {
+        "fpr": 0.0,
+        "tpr": 0.0
+      },
+      {
+        "fpr": 0.0,
+        "tpr": 1.0
+      },
+      {
+        "fpr": 1.0,
+        "tpr": 1.0
+      },
+      {
+        "fpr": 1.0,
+        "tpr": 1.0
+      }
+    ],
+    "pr_curve": [
+      {
+        "recall": 1.0,
+        "precision": 0.06
+      },
+      {
+        "recall": 1.0,
+        "precision": 1.0
+      },
+      {
+        "recall": 0.0,
+        "precision": 1.0
+      }
+    ]
+  },
+  "feature_names": [
+    "amount",
+    "log_amount",
+    "amount_to_user_avg_ratio",
+    "hour",
+    "hour_sin",
+    "hour_cos",
+    "day_of_week",
+    "is_weekend",
+    "is_night",
+    "payment_method_code",
+    "velocity_1h",
+    "velocity_24h",
+    "device_sharing_degree",
+    "is_emulator",
+    "device_risk_prior",
+    "merchant_risk_prior",
+    "geo_distance_risk"
+  ],
+  "test_sample_count": 100,
+  "fraud_test_count": 6
+}

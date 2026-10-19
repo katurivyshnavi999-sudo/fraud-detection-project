@@ -23,6 +23,8 @@ class GraphDataResponse(BaseModel):
     edges: List[GraphEdge]
     total_nodes: int
     total_edges: int
+    root_entity: Optional[str] = None
+    depth: Optional[int] = None
 
 class ConnectedEntity(BaseModel):
     id: str

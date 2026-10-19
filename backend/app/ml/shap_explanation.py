@@ -18,7 +18,7 @@ class ShapExplainer(BaseXAIExplainer):
     """
     SHAP Explainer Service.
     When actual tree/deep models are loaded with SHAP, computes real Shapley values.
-    In demo prototype mode, computes domain-grounded marginal attributions clearly labelled as DEMO DATA.
+    Computes domain-grounded marginal feature attributions for digital payment transactions.
     """
     
     BASE_VALUE = 0.08  # E[f(x)] - average background digital payment fraud rate (8%)
@@ -27,11 +27,13 @@ class ShapExplainer(BaseXAIExplainer):
         self.model = model
         self.shap_available = SHAP_AVAILABLE
 
-    def explain_transaction(self, transaction_data: Dict[str, Any], risk_score: float) -> Dict[str, Any]:
+    def explain_transaction(self, transaction_data: Dict[str, Any], risk_score: Optional[float] = None) -> Dict[str, Any]:
         """
         Computes feature attribution breakdown:
         f(x) = E[f(x)] + SUM(phi_i)
         """
+        if risk_score is None:
+            risk_score = float(transaction_data.get("risk_score", transaction_data.get("hybrid_risk_score", 50.0)))
         amount = float(transaction_data.get("amount", 0.0))
         device_id = str(transaction_data.get("device_id", ""))
         merchant_id = str(transaction_data.get("merchant_id", ""))
@@ -45,18 +47,18 @@ class ShapExplainer(BaseXAIExplainer):
         negative_push = 0.0
 
         # Feature 1: Transaction Amount
-        if amount > 1000.0:
-            phi = round(0.24 * (amount / 2000.0), 3)
+        if amount > 25000.0:
+            phi = round(0.24 * (amount / 50000.0), 3)
             phi = min(0.38, phi)
             positive_push += phi
             features_attr.append({
                 "feature": "amount",
                 "display_name": "Transaction Amount",
-                "feature_value": f"${amount:,.2f}",
+                "feature_value": f"₹{amount:,.2f}",
                 "shap_value": phi,
                 "direction": "push_fraud",
                 "relative_importance": 28.0,
-                "impact_description": f"High amount (${amount:,.2f}) significantly deviates from standard consumer baseline."
+                "impact_description": f"High amount (₹{amount:,.2f}) significantly deviates from standard consumer baseline."
             })
         else:
             phi = -0.15
@@ -64,11 +66,11 @@ class ShapExplainer(BaseXAIExplainer):
             features_attr.append({
                 "feature": "amount",
                 "display_name": "Transaction Amount",
-                "feature_value": f"${amount:,.2f}",
+                "feature_value": f"₹{amount:,.2f}",
                 "shap_value": phi,
                 "direction": "push_legitimate",
                 "relative_importance": 18.0,
-                "impact_description": f"Standard transaction amount (${amount:,.2f}) aligns with regular spend behavior."
+                "impact_description": f"Standard transaction amount (₹{amount:,.2f}) aligns with regular spend behavior."
             })
 
         # Feature 2: Device Trust & Sharing
@@ -192,10 +194,12 @@ class ShapExplainer(BaseXAIExplainer):
             "risk_score": risk_score,
             "base_value": self.BASE_VALUE,
             "model_output": round(risk_score / 100.0, 3),
-            "is_demo_data": True,
-            "notice": "DEMO DATA: Attributions calculated using academic prototype explainer heuristics. Connect trained tree/deep weights for live empirical Shapley values.",
+            "is_simulated_data": True,
+            "notice": "Simulated Attribution Data: Attributions calculated using academic prototype explainer heuristics. Connect trained tree/deep weights for live empirical Shapley values.",
             "features": features_attr,
             "positive_fraud_push": round(positive_push, 3),
             "negative_fraud_push": round(negative_push, 3),
             "summary_text": summary
         }
+
+shap_explainer = ShapExplainer()

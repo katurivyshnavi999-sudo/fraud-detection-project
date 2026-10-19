@@ -1,45 +1,67 @@
 import React from 'react';
 
 export const StatusBadge = ({ status, type = 'prediction' }) => {
-  if (type === 'prediction') {
-    const isFraud = String(status).toLowerCase().includes('fraud') || String(status).toLowerCase() === 'blocked' || String(status).toLowerCase() === 'flagged';
+  const s = String(status || '').trim();
+  const lower = s.toLowerCase();
+
+  if (type === 'prediction' || type === 'category') {
+    const isFraud = lower.includes('fraud') || lower === 'blocked' || lower === 'high risk' || lower === 'critical';
+    const isSuspicious = lower.includes('suspicious') || lower.includes('review') || lower === 'medium risk' || lower === 'warning';
+    
+    if (isFraud) {
+      return (
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200">
+          <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse"></span>
+          {s || 'Fraud'}
+        </span>
+      );
+    }
+
+    if (isSuspicious) {
+      return (
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200">
+          <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+          {s || 'Suspicious'}
+        </span>
+      );
+    }
+
     return (
-      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold uppercase tracking-wider ${
-        isFraud 
-          ? 'bg-red-950/80 text-red-400 border border-red-800/60' 
-          : 'bg-emerald-950/80 text-emerald-400 border border-emerald-800/60'
-      }`}>
-        <span className={`w-1.5 h-1.5 rounded-full mr-1.5 ${isFraud ? 'bg-red-400 animate-pulse' : 'bg-emerald-400'}`}></span>
-        {status}
+      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+        {s || 'Safe'}
       </span>
     );
   }
 
   if (type === 'risk') {
-    const s = String(status).toUpperCase();
-    let colorClass = 'bg-slate-800 text-slate-300 border-slate-700';
-    if (s === 'CRITICAL') colorClass = 'bg-red-950 text-red-300 border-red-700 font-bold';
-    else if (s === 'HIGH') colorClass = 'bg-orange-950 text-orange-300 border-orange-700';
-    else if (s === 'MEDIUM') colorClass = 'bg-amber-950 text-amber-300 border-amber-700';
-    else if (s === 'LOW') colorClass = 'bg-emerald-950 text-emerald-300 border-emerald-700';
+    const upper = s.toUpperCase();
+    let badgeClass = 'bg-slate-100 text-slate-700 border-slate-200';
+    if (upper === 'CRITICAL' || upper === 'HIGH') {
+      badgeClass = 'bg-rose-50 text-rose-700 border-rose-200 font-bold';
+    } else if (upper === 'MEDIUM' || upper === 'SUSPICIOUS') {
+      badgeClass = 'bg-amber-50 text-amber-700 border-amber-200';
+    } else if (upper === 'LOW' || upper === 'SAFE') {
+      badgeClass = 'bg-emerald-50 text-emerald-700 border-emerald-200';
+    }
 
     return (
-      <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-mono font-medium border ${colorClass}`}>
-        {status}
+      <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-mono font-medium border ${badgeClass}`}>
+        {s || 'LOW'}
       </span>
     );
   }
 
   return (
-    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-slate-800 text-slate-300 border border-slate-700">
-      {status}
+    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-slate-100 text-slate-700 border border-slate-200">
+      {s}
     </span>
   );
 };
 
-export const DemoModeBadge = ({ note }) => (
-  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-mono bg-blue-950/60 text-blue-300 border border-blue-800/50" title={note || "Academic Prototype Demo Mode: Trained weights can be loaded via /models"}>
-    <span className="w-2 h-2 rounded-full bg-blue-400 animate-ping"></span>
-    DEMO INFERENCE MODE
+export const SimulatedEnvironmentBadge = ({ label = 'Simulated Payment Network' }) => (
+  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
+    <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
+    {label}
   </span>
 );

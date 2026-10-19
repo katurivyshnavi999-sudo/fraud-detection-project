@@ -1,46 +1,65 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider } from './context/AuthContext';
+import { AppProvider } from './context/AppContext';
 import { RootLayout } from './layouts/RootLayout';
-import { LoginPage } from './pages/LoginPage';
-import { HomePage } from './pages/HomePage';
-import { DashboardPage } from './pages/DashboardPage';
-import { DetectFraudPage } from './pages/DetectFraudPage';
-import { NetworkGraphPage } from './pages/NetworkGraphPage';
-import { ExplainableAIPage } from './pages/ExplainableAIPage';
-import { ContinualLearningPage } from './pages/ContinualLearningPage';
-import { DatasetPage } from './pages/DatasetPage';
-import { AnalyticsPage } from './pages/AnalyticsPage';
-import { ModelInfoPage } from './pages/ModelInfoPage';
-import { AboutPage } from './pages/AboutPage';
+import { ErrorBoundary } from './components/common/ErrorBoundary';
+
+// The Primary Core Pages Connected to Left Sidebar Navigation
+import { LiveMonitorPage } from './pages/LiveMonitorPage';
+import { AnalyzeTransactionPage } from './pages/AnalyzeTransactionPage';
+import { RelationshipExplorerPage } from './pages/RelationshipExplorerPage';
+import { SHAPPage } from './pages/SHAPPage';
+
+export function AppRoutes() {
+  return (
+    <Routes>
+      {/* Main Single Application Inside Modern RootLayout with Left Sidebar */}
+      <Route path="/" element={<RootLayout />}>
+        {/* 1. Landing Page: Live Transactions */}
+        <Route index element={<LiveMonitorPage />} />
+        <Route path="transactions" element={<LiveMonitorPage />} />
+        <Route path="live" element={<LiveMonitorPage />} />
+
+        {/* 2. Feature Two: Enter and Analyze a Transaction */}
+        <Route path="analyze" element={<AnalyzeTransactionPage />} />
+
+        {/* 3. Feature Three: Relationship Graph Explorer */}
+        <Route path="explorer" element={<RelationshipExplorerPage />} />
+
+        {/* 4. Feature Four: SHAP Explanation */}
+        <Route path="shap" element={<SHAPPage />} />
+
+        {/* Safe Redirects for Removed Routes */}
+        <Route path="timeline" element={<Navigate to="/explorer" replace />} />
+        <Route path="case-study" element={<Navigate to="/explorer" replace />} />
+
+        {/* Legacy / Direct Route Compatibility Fallbacks (No Login Walls) */}
+        <Route path="admin/live-monitor" element={<Navigate to="/" replace />} />
+        <Route path="admin/dashboard" element={<Navigate to="/" replace />} />
+        <Route path="admin/fraud-network" element={<Navigate to="/explorer" replace />} />
+        <Route path="admin/check-fraud" element={<Navigate to="/analyze" replace />} />
+        <Route path="admin/transactions/predict" element={<Navigate to="/analyze" replace />} />
+        <Route path="admin/shap-explanation" element={<Navigate to="/shap" replace />} />
+        <Route path="user/check-fraud" element={<Navigate to="/analyze" replace />} />
+        <Route path="user/dashboard" element={<Navigate to="/" replace />} />
+        <Route path="login" element={<Navigate to="/" replace />} />
+      </Route>
+
+      {/* Catch-all route */}
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
+  );
+}
 
 export function App() {
   return (
-    <AuthProvider>
+    <ErrorBoundary>
       <BrowserRouter>
-        <Routes>
-          {/* Public Authentication */}
-          <Route path="/login" element={<LoginPage />} />
-
-          {/* Main Application Routes inside RootLayout */}
-          <Route path="/" element={<RootLayout />}>
-            <Route index element={<HomePage />} />
-            <Route path="dashboard" element={<DashboardPage />} />
-            <Route path="detect" element={<DetectFraudPage />} />
-            <Route path="network" element={<NetworkGraphPage />} />
-            <Route path="explainable-ai" element={<ExplainableAIPage />} />
-            <Route path="continual-learning" element={<ContinualLearningPage />} />
-            <Route path="dataset" element={<DatasetPage />} />
-            <Route path="analytics" element={<AnalyticsPage />} />
-            <Route path="architecture" element={<ModelInfoPage />} />
-            <Route path="about" element={<AboutPage />} />
-          </Route>
-
-          {/* Catch-all fallback */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+        <AppProvider>
+          <AppRoutes />
+        </AppProvider>
       </BrowserRouter>
-    </AuthProvider>
+    </ErrorBoundary>
   );
 }
 

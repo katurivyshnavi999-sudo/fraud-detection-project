@@ -18,17 +18,17 @@ def get_transaction_explanation(transaction_id: str, db: Session = Depends(get_d
     tx = db.query(Transaction).filter(Transaction.transaction_id == transaction_id).first()
     
     if not tx:
-        # If not found in DB, check fallback demo format or return 404
+        # Fallback simulated transaction structure if ID not yet committed
         tx_dict = {
             "transaction_id": transaction_id,
-            "amount": 1250.0,
+            "amount": 42000.0,
             "device_id": "DEV_4102",
             "merchant_id": "MERCH_902",
             "payment_method": "Credit Card",
-            "location": "Lagos",
-            "timestamp": "2026-09-18 02:14:08"
+            "location": "Hyderabad",
+            "timestamp": "2026-09-28 02:22:10"
         }
-        risk_score = 88.5
+        risk_score = 95.0
     else:
         tx_dict = {
             "transaction_id": tx.transaction_id,
@@ -39,7 +39,7 @@ def get_transaction_explanation(transaction_id: str, db: Session = Depends(get_d
             "location": tx.location,
             "timestamp": tx.timestamp
         }
-        risk_score = tx.risk_score
+        risk_score = tx.hybrid_risk_score or 10.0
 
     res = explainer.explain_transaction(tx_dict, risk_score)
     return res
